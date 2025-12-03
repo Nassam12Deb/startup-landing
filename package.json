@@ -1,0 +1,27 @@
+{
+  "name": "nexatech-landing",
+  "version": "1.0.0",
+  "description": "Landing page pour startup NexaTech avec IA",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=./",
+    "build": "echo 'Build step optionnel pour Netlify'",
+    "test": "node tests/test-e2e.js",
+    "deploy": "echo 'Déploiement sur Netlify'"
+  },
+  "keywords": [
+    "landing-page",
+    "startup",
+    "ai",
+    "responsive",
+    "netlify"
+  ],
+  "author": "Votre Nom",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
