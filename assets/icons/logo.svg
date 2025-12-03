@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cercle principal -->
+    <circle cx="100" cy="100" r="90" fill="#6366f1"/>
+    
+    <!-- Symbole N (Nexus) stylisé -->
+    <path d="M80 60 L80 140 L100 100 L120 60 L120 140" 
+          stroke="#ffffff" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          fill="none"/>
+    
+    <!-- Points de connexion -->
+    <circle cx="80" cy="60" r="8" fill="#10b981"/>
+    <circle cx="120" cy="60" r="8" fill="#f59e0b"/>
+    <circle cx="80" cy="140" r="8" fill="#ef4444"/>
+    <circle cx="120" cy="140" r="8" fill="#8b5cf6"/>
+    <circle cx="100" cy="100" r="8" fill="#ffffff"/>
+</svg>

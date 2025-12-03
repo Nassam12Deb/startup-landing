@@ -1333,3 +1333,139 @@ textarea.error:focus {
 .notification-close:hover {
     opacity: 1;
 }
+
+
+
+
+/* ===== LOGO ARRONDI ===== */
+.logo-rounded {
+    width: 50px;
+    height: 50px;
+    border-radius: 30px; /* Contrôle l'arrondi des bords */
+    margin-right: 0px;
+    object-fit: contain;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+}
+
+.logo:hover .logo-rounded {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    border-color: var(--primary);
+    border-radius: 16px; /* Effet d'arrondi accentué au hover */
+}
+
+/* Logo dans le footer */
+.footer .logo-rounded {
+    width: 50px;
+    height: 50px;
+    margin-right: 0px;
+    border-radius: 30px; /* Un peu plus arrondi dans le footer */
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer .logo-rounded:hover {
+    border-color: white;
+    border-radius: 20px;
+}
+
+/* ===== VARIATIONS D'ARRONDI ===== */
+/* Option 1: Légèrement arrondi (style moderne) */
+.logo-rounded.rounded-sm {
+    border-radius: 8px;
+}
+
+/* Option 2: Arrondi moyen */
+.logo-rounded.rounded-md {
+    border-radius: 12px;
+}
+
+/* Option 3: Très arrondi (presque cercle) */
+.logo-rounded.rounded-lg {
+    border-radius: 20px;
+}
+
+/* Option 4: Cercle parfait */
+.logo-rounded.rounded-full {
+    border-radius: 50%;
+}
+
+/* ===== EFFETS SUPPLEMENTAIRES ===== */
+/* Ombre portée subtile */
+.logo-rounded {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Effet de brillance sur hover */
+.logo-rounded:hover {
+    filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3))
+            brightness(1.05);
+}
+
+/* Animation de rotation subtile */
+@keyframes gentle-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.logo:hover .logo-rounded {
+    animation: gentle-rotate 20s linear infinite;
+}
+
+/* ===== RESPONSIVE LOGO ===== */
+@media (max-width: 768px) {
+    .logo-rounded {
+        width: 35px;
+        height: 35px;
+        margin-right: 10px;
+        border-radius: 10px;
+    }
+    
+    .footer .logo-rounded {
+        width: 50px;
+        height: 50px;
+        margin-right: 12px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-rounded {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+    
+    .footer .logo-rounded {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+    }
+}
+
+/* ===== POUR IMAGES AVEC FOND BLANC ===== */
+/* Si votre logo a un fond blanc, ajoutez cette classe */
+.logo-rounded.white-bg {
+    background-color: white;
+    padding: 4px;
+}
+
+/* ===== POUR IMAGES AVEC FOND TRANSPARENT ===== */
+/* Si votre logo est transparent, ajoutez un fond subtil */
+.logo-rounded.transparent-bg {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
+}
+
+/* ===== EFFET DE REFLET ===== */
+.logo-rounded::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
