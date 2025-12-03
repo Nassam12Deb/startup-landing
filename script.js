@@ -1,12 +1,11 @@
 // ===== CONFIGURATION =====
 const CONFIG = {
-    FORMSPREE_ENDPOINT: "https://formspree.io/f/xxxxxxxx", // À remplacer avec votre endpoint
     SCROLL_OFFSET: 80,
     DEBOUNCE_DELAY: 100
 };
 
 // ===== ÉLÉMENTS DOM =====
-const domElements = {
+const DOM = {
     body: document.body,
     header: document.querySelector('.header'),
     navToggle: document.getElementById('navToggle'),
@@ -17,311 +16,194 @@ const domElements = {
     contactForm: document.getElementById('contactForm')
 };
 
-// ===== ÉTAT GLOBAL =====
-let scrollTimeout;
-let lastScrollTop = 0;
-
 // ===== INITIALISATION =====
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
     setupEventListeners();
     setupScrollAnimations();
-    updateActiveNavLink();
     checkBackToTopVisibility();
-    
-    console.log('🚀 Landing page NexaTech initialisée !');
+    console.log('🚀 Landing page initialisée');
 }
 
 // ===== GESTION DES ÉVÉNEMENTS =====
 function setupEventListeners() {
     // Menu mobile
-    if (domElements.navToggle) {
-        domElements.navToggle.addEventListener('click', toggleMobileMenu);
+    if (DOM.navToggle) {
+        DOM.navToggle.addEventListener('click', toggleMobileMenu);
+        DOM.navToggle.addEventListener('touchstart', (e) => e.preventDefault());
     }
     
     // Fermer le menu au clic sur un lien
-    domElements.navLinks.forEach(link => {
+    DOM.navLinks.forEach(link => {
         link.addEventListener('click', closeMobileMenu);
     });
     
     // Back to top
-    if (domElements.backToTop) {
-        domElements.backToTop.addEventListener('click', scrollToTop);
+    if (DOM.backToTop) {
+        DOM.backToTop.addEventListener('click', scrollToTop);
     }
     
-    // Scroll
-    window.addEventListener('scroll', handleScroll);
+    // Scroll optimisé avec debounce
+    window.addEventListener('scroll', debounce(handleScroll, CONFIG.DEBOUNCE_DELAY));
     
-    // Forms
-    if (domElements.signupForm) {
-        domElements.signupForm.addEventListener('submit', handleSignupSubmit);
+    // Validation formulaires avant soumission
+    if (DOM.signupForm) {
+        DOM.signupForm.addEventListener('submit', validateSignupForm);
     }
     
-    if (domElements.contactForm) {
-        domElements.contactForm.addEventListener('submit', handleContactSubmit);
+    if (DOM.contactForm) {
+        DOM.contactForm.addEventListener('submit', validateContactForm);
     }
     
     // Clic en dehors du menu pour le fermer
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav') && domElements.navMenu.classList.contains('active')) {
-            closeMobileMenu();
-        }
-    });
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
 }
 
 // ===== MENU MOBILE =====
 function toggleMobileMenu() {
-    domElements.navMenu.classList.toggle('active');
-    const icon = domElements.navToggle.querySelector('i');
+    DOM.navMenu.classList.toggle('active');
+    const icon = DOM.navToggle.querySelector('i');
     
-    if (domElements.navMenu.classList.contains('active')) {
-        icon.classList.remove('fa-bars');
-        icon.classList.add('fa-times');
-        domElements.body.style.overflow = 'hidden';
+    if (DOM.navMenu.classList.contains('active')) {
+        icon.classList.replace('fa-bars', 'fa-times');
+        DOM.body.style.overflow = 'hidden';
     } else {
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
-        domElements.body.style.overflow = '';
+        icon.classList.replace('fa-times', 'fa-bars');
+        DOM.body.style.overflow = '';
     }
 }
 
 function closeMobileMenu() {
-    domElements.navMenu.classList.remove('active');
-    const icon = domElements.navToggle.querySelector('i');
-    icon.classList.remove('fa-times');
-    icon.classList.add('fa-bars');
-    domElements.body.style.overflow = '';
+    DOM.navMenu.classList.remove('active');
+    const icon = DOM.navToggle.querySelector('i');
+    icon.classList.replace('fa-times', 'fa-bars');
+    DOM.body.style.overflow = '';
+}
+
+function handleClickOutside(e) {
+    if (!e.target.closest('.nav') && DOM.navMenu.classList.contains('active')) {
+        closeMobileMenu();
+    }
 }
 
 // ===== GESTION DU SCROLL =====
 function handleScroll() {
-    // Header scroll effect
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    // Header effect
+    DOM.header.classList.toggle('scrolled', window.scrollY > 50);
     
-    if (scrollTop > 50) {
-        domElements.header.classList.add('scrolled');
-    } else {
-        domElements.header.classList.remove('scrolled');
-    }
-    
-    // Back to top visibility
+    // Back to top
     checkBackToTopVisibility();
     
-    // Active nav link update
+    // Update active nav
     updateActiveNavLink();
-    
-    // Animation au scroll avec debounce
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-        animateOnScroll();
-    }, CONFIG.DEBOUNCE_DELAY);
 }
 
 function updateActiveNavLink() {
-    const sections = document.querySelectorAll('section[id]');
     const scrollPosition = window.scrollY + CONFIG.SCROLL_OFFSET;
     
-    sections.forEach(section => {
+    document.querySelectorAll('section[id]').forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.offsetHeight;
-        const sectionId = section.getAttribute('id');
+        const sectionId = section.id;
         
         if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-            domElements.navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${sectionId}`) {
-                    link.classList.add('active');
-                }
+            DOM.navLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === `#${sectionId}`;
+                link.classList.toggle('active', isActive);
             });
         }
     });
 }
 
 function checkBackToTopVisibility() {
-    if (window.scrollY > 300) {
-        domElements.backToTop.classList.add('visible');
-    } else {
-        domElements.backToTop.classList.remove('visible');
+    if (DOM.backToTop) {
+        DOM.backToTop.classList.toggle('visible', window.scrollY > 300);
     }
 }
 
 function scrollToTop(e) {
     e.preventDefault();
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ===== ANIMATIONS SCROLL =====
 function setupScrollAnimations() {
-    const animatedElements = document.querySelectorAll('[data-aos]');
-    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('aos-animate');
             }
         });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     
-    animatedElements.forEach(el => observer.observe(el));
+    document.querySelectorAll('[data-aos]').forEach(el => observer.observe(el));
 }
 
-function animateOnScroll() {
-    // Animation des éléments flottants
-    const floatingElements = document.querySelectorAll('.floating-element');
-    floatingElements.forEach((el, index) => {
-        const delay = index * 0.5;
-        el.style.animationDelay = `${delay}s`;
-    });
-}
-
-// ===== FORMULAIRES =====
-async function handleSignupSubmit(e) {
-    e.preventDefault();
+// ===== VALIDATION FORMULAIRES =====
+function validateSignupForm(e) {
+    const email = this.signupEmail?.value.trim();
     
-    const form = e.target;
-    const emailInput = form.querySelector('#signupEmail');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    
-    // Validation basique
-    if (!isValidEmail(emailInput.value)) {
+    if (!email || !isValidEmail(email)) {
+        e.preventDefault();
         showNotification('Veuillez entrer une adresse email valide', 'error');
-        emailInput.focus();
+        this.signupEmail?.focus();
         return;
     }
     
-    // Simuler l'envoi
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
-    submitBtn.disabled = true;
-    
-    // Simulation d'une requête API
-    setTimeout(() => {
-        showNotification('🎉 Merci ! Votre essai gratuit va commencer.', 'success');
-        form.reset();
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        
-        // Redirection vers une page de confirmation (optionnelle)
-        // window.location.href = '/merci.html';
-    }, 1500);
+    showNotification('🎉 Merci ! Votre inscription est en cours...', 'success');
 }
 
-async function handleContactSubmit(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    
-    // Validation
-    const errors = validateContactForm(formData);
-    if (errors.length > 0) {
-        errors.forEach(error => {
-            showNotification(error, 'error');
-        });
-        return;
-    }
-    
-    // Simuler l'envoi
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
-    submitBtn.disabled = true;
-    
-    try {
-        // Pour Formspree (décommentez et configurez)
-        /*
-        const response = await fetch(CONFIG.FORMSPREE_ENDPOINT, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            showNotification('✅ Message envoyé avec succès !', 'success');
-            form.reset();
-        } else {
-            throw new Error('Erreur lors de l\'envoi');
-        }
-        */
-        
-        // Simulation
-        setTimeout(() => {
-            showNotification('✅ Message envoyé avec succès !', 'success');
-            form.reset();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Erreur:', error);
-        showNotification('❌ Une erreur est survenue. Veuillez réessayer.', 'error');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }
-}
-
-function validateContactForm(formData) {
+function validateContactForm(e) {
+    const name = this.name?.value.trim();
+    const email = this.email?.value.trim();
+    const message = this.message?.value.trim();
     const errors = [];
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const message = formData.get('message');
     
-    if (!name || name.trim().length < 2) {
+    if (!name || name.length < 2) {
         errors.push('Le nom doit contenir au moins 2 caractères');
     }
     
-    if (!isValidEmail(email)) {
+    if (!email || !isValidEmail(email)) {
         errors.push('Veuillez entrer une adresse email valide');
     }
     
-    if (!message || message.trim().length < 10) {
+    if (!message || message.length < 10) {
         errors.push('Le message doit contenir au moins 10 caractères');
     }
     
-    return errors;
+    if (errors.length > 0) {
+        e.preventDefault();
+        errors.forEach(error => showNotification(error, 'error'));
+        return;
+    }
+    
+    showNotification('✅ Message envoyé avec succès !', 'success');
 }
 
 function isValidEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 // ===== NOTIFICATIONS =====
 function showNotification(message, type = 'info') {
-    // Supprimer les notifications existantes
     removeExistingNotifications();
     
-    // Créer la notification
     const notification = document.createElement('div');
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    
     notification.className = `notification notification-${type}`;
-    
-    // Icône selon le type
-    const icons = {
-        success: '✅',
-        error: '❌',
-        info: 'ℹ️'
-    };
-    
     notification.innerHTML = `
         <div class="notification-content">
             <span class="notification-icon">${icons[type] || icons.info}</span>
-            <span class="notification-message">${message}</span>
+            <span>${message}</span>
         </div>
         <button class="notification-close" aria-label="Fermer">
             <i class="fas fa-times"></i>
         </button>
     `;
     
-    // Styles
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -330,108 +212,54 @@ function showNotification(message, type = 'info') {
         color: white;
         padding: 1rem 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        max-width: 400px;
+        max-width: min(400px, 90vw);
         z-index: 9999;
         animation: slideInRight 0.3s ease-out;
-        font-weight: 500;
     `;
     
-    // Ajouter au body
     document.body.appendChild(notification);
     
-    // Bouton de fermeture
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.addEventListener('click', () => {
+    notification.querySelector('.notification-close').addEventListener('click', () => {
         closeNotification(notification);
     });
     
-    // Fermer automatiquement après 5 secondes
-    setTimeout(() => {
-        closeNotification(notification);
-    }, 5000);
+    setTimeout(() => closeNotification(notification), 5000);
 }
 
 function removeExistingNotifications() {
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => {
-        closeNotification(notification);
-    });
+    document.querySelectorAll('.notification').forEach(closeNotification);
 }
 
 function closeNotification(notification) {
     notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 300);
+    setTimeout(() => notification.remove(), 300);
 }
 
-// Ajouter les animations CSS pour les notifications
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .notification-close {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        padding: 0;
-        margin-left: 0.5rem;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-    }
-    
-    .notification-close:hover {
-        opacity: 1;
-    }
-`;
-document.head.appendChild(notificationStyles);
-
-// ===== FONCTIONS UTILITAIRES =====
+// ===== UTILITAIRES =====
 function debounce(func, wait) {
     let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+    return (...args) => {
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => func.apply(this, args), wait);
     };
 }
 
-// Exposer certaines fonctions globalement (pour debug)
-window.app = {
-    showNotification,
-    scrollToTop,
-    validateContactForm
-};
-
-console.log('📱 Application prête !');
+// Initialisation des animations de notification
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(animationStyles);
